@@ -88,7 +88,12 @@ extern GL_APICALL void (* GL_APIENTRY glBlitFramebuffer) (GLint srcX0, GLint src
 extern GL_APICALL void (* GL_APIENTRY glBindBufferBase) (GLenum target, GLuint index, GLuint buffer);
 extern GL_APICALL void (* GL_APIENTRY glBlitFramebuffer) (GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter);
 #    else
-#        include <GLES3/gl3.h>
+#        if defined(__APPLE__) && defined(__IPHONE_OS_VERSION_MIN_REQUIRED)
+#            include <OpenGLES/ES3/gl.h>
+#            include <OpenGLES/ES3/glext.h>
+#        else
+#            include <GLES3/gl3.h>
+#        endif
 #    endif
 
 #    define RENDERGL_HAS_SHADERS

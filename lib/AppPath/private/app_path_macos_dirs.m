@@ -25,42 +25,10 @@
 
 char *getHomeDir(void)
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    NSString *str;
     char *retval = NULL;
-    const char *base;
-
-    str = NSHomeDirectory();
-    base = [str fileSystemRepresentation];
-
-    if(base)
-    {
-        const size_t len = SDL_strlen(base) + 4;
-        retval = (char *)SDL_malloc(len);
-
-        if(retval == NULL)
-            SDL_OutOfMemory();
-        else
-            SDL_snprintf(retval, len, "%s", base);
-    }
-
-    [pool drain];
-    return retval;
-}
-
-char * getAppSupportDir(void)
-{
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    char *retval = NULL;
-    NSString *str;
-    const char *base;
-
-    NSArray *array = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
-
-    if([array count] > 0) /* we only want the first item in the list. */
-    {
-        str = [array objectAtIndex:0];
-        base = [str fileSystemRepresentation];
+    @autoreleasepool {
+        NSString *str = NSHomeDirectory();
+        const char *base = [str fileSystemRepresentation];
 
         if(base)
         {
@@ -73,39 +41,61 @@ char * getAppSupportDir(void)
                 SDL_snprintf(retval, len, "%s", base);
         }
     }
+    return retval;
+}
 
-    [pool drain];
+char * getAppSupportDir(void)
+{
+    char *retval = NULL;
+    @autoreleasepool {
+        NSArray *array = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
+
+        if([array count] > 0)
+        {
+            NSString *str = [array objectAtIndex:0];
+            const char *base = [str fileSystemRepresentation];
+
+            if(base)
+            {
+                const size_t len = SDL_strlen(base) + 4;
+                retval = (char *)SDL_malloc(len);
+
+                if(retval == NULL)
+                    SDL_OutOfMemory();
+                else
+                    SDL_snprintf(retval, len, "%s", base);
+            }
+        }
+    }
     return retval;
 }
 
 char * getScreenCaptureDir(void)
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+#if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
+    /* Screen capture directory is not applicable on iOS */
+    return NULL;
+#else
     char *retval = NULL;
-    NSUserDefaults *appUserDefaults;
-    NSDictionary *prefsDict;
-    NSString *str;
-    const char *base;
+    @autoreleasepool {
+        NSUserDefaults *appUserDefaults = [[NSUserDefaults alloc] init];
+        [appUserDefaults addSuiteNamed:@"com.apple.screencapture"];
+        NSDictionary *prefsDict = [appUserDefaults dictionaryRepresentation];
 
-    /* Get current screencapture location */
-    appUserDefaults = [[NSUserDefaults alloc] init];
-    [appUserDefaults addSuiteNamed:@"com.apple.screencapture"];
-    prefsDict = [appUserDefaults dictionaryRepresentation];
+        NSString *str = [prefsDict valueForKey:@"location"];
+        const char *base = [str fileSystemRepresentation];
 
-    str = [prefsDict valueForKey:@"location"];
-    base = [str fileSystemRepresentation];
+        if(base)
+        {
+            const size_t len = SDL_strlen(base) + 4;
+            retval = (char *)SDL_malloc(len);
 
-    if(base)
-    {
-        const size_t len = SDL_strlen(base) + 4;
-        retval = (char *)SDL_malloc(len);
-
-        if(retval == NULL)
-            SDL_OutOfMemory();
-        else
-            SDL_snprintf(retval, len, "%s", base);
+            if(retval == NULL)
+                SDL_OutOfMemory();
+            else
+                SDL_snprintf(retval, len, "%s", base);
+        }
     }
-
-    [pool drain];
     return retval;
+#endif
 }

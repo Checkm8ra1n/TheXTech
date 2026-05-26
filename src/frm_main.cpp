@@ -425,8 +425,9 @@ bool FrmMain::restartRenderer()
     g_render = m_render.get();
 
     CmdLineSetup_t setup;
+    (void)setup;
 
-    res = m_render->initRender(setup, reinterpret_cast<WindowUsed*>(g_window)->getWindow());
+    res = m_render->initRender(reinterpret_cast<WindowUsed*>(g_window)->getWindow());
 #    endif
 
     XWindow::show();

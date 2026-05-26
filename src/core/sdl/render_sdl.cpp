@@ -20,7 +20,15 @@
 
 #include <SDL2/SDL_version.h>
 #include <SDL2/SDL_render.h>
-#include <SDL2/SDL_opengl.h>
+#if !defined(__APPLE__) || !defined(TARGET_OS_IPHONE) || !TARGET_OS_IPHONE
+#   include <SDL2/SDL_opengl.h>
+#endif
+#ifndef GL_RGBA
+#   define GL_RGBA 0x1908
+#endif
+#ifndef GL_BGRA
+#   define GL_BGRA 0x80E1
+#endif
 #include <SDL2/SDL_hints.h>
 
 #include <FreeImageLite.h>

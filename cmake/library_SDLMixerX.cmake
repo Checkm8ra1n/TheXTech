@@ -276,6 +276,8 @@ list(REMOVE_DUPLICATES AUDIO_CODECS_BUILD_ARGS)
 
 ExternalProject_Add(
     AudioCodecs_Local
+    CMAKE_GENERATOR "Unix Makefiles"
+    CMAKE_CACHE_ARGS "-DCMAKE_MAKE_PROGRAM:FILEPATH=/usr/bin/make"
     PREFIX ${CMAKE_BINARY_DIR}/external/AudioCodecs
 #    GIT_REPOSITORY https://github.com/WohlSoft/AudioCodecs.git
 #   UPDATE_COMMAND ""
@@ -285,7 +287,9 @@ ExternalProject_Add(
         "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}"
         "-DCMAKE_INSTALL_PREFIX=${DEPENDENCIES_INSTALL_DIR}"
         "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
-        "-DCMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}"
+        "-DCMAKE_MAKE_PROGRAM=/usr/bin/make"
+        $<$<BOOL:${PLATFORM}>:-DPLATFORM=${PLATFORM}>
+        $<$<BOOL:${ARCHS}>:-DARCHS=${ARCHS}>
         ${AUDIO_CODECS_BUILD_ARGS}
         $<$<BOOL:APPLE>:-DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}>
         $<$<BOOL:APPLE>:-DCMAKE_OSX_ARCHITECTURES=${CMAKE_OSX_ARCHITECTURES}>
@@ -314,6 +318,8 @@ if(NOT THEXTECH_NO_MIXER_X)
     # SDL Mixer X - an audio library, fork of SDL Mixer
     ExternalProject_Add(
         SDLMixerX_Local
+        CMAKE_GENERATOR "Unix Makefiles"
+        CMAKE_CACHE_ARGS "-DCMAKE_MAKE_PROGRAM:FILEPATH=/usr/bin/make"
         PREFIX ${CMAKE_BINARY_DIR}/external/SDLMixerX
     #    GIT_REPOSITORY https://github.com/WohlSoft/SDL-Mixer-X.git
     #    UPDATE_COMMAND ""
@@ -323,7 +329,7 @@ if(NOT THEXTECH_NO_MIXER_X)
             "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}"
             "-DCMAKE_INSTALL_PREFIX=${DEPENDENCIES_INSTALL_DIR}"
             "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
-            "-DCMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}"
+            "-DCMAKE_MAKE_PROGRAM=/usr/bin/make"
             "-DAUDIO_CODECS_REPO_PATH=${CMAKE_BINARY_DIR}/external/AudioCodecs"
             "-DAUDIO_CODECS_INSTALL_PATH=${DEPENDENCIES_INSTALL_DIR}"
             "-DUSE_SYSTEM_SDL2=${USE_SYSTEM_SDL2}"
@@ -342,10 +348,14 @@ if(NOT THEXTECH_NO_MIXER_X)
             "-DUSE_MP3_DRMP3=ON"
             "-DUSE_MP3_MPG123=OFF"
             "-DUSE_SYSTEM_ZLIB=${USE_SYSTEM_ZLIB}"
+            $<$<BOOL:${PLATFORM}>:-DUSE_MIDI_NATIVE=OFF>
+            $<$<BOOL:${PLATFORM}>:-DUSE_MIDI_ADLMIDI=ON>
             ${MIXERX_CMAKE_FLAGS}
             ${ANDROID_CMAKE_FLAGS}
             ${VITA_CMAKE_FLAGS}
             ${VITA_MIXERX_CMAKE_FLAGS}
+            $<$<BOOL:${PLATFORM}>:-DPLATFORM=${PLATFORM}>
+            $<$<BOOL:${ARCHS}>:-DARCHS=${ARCHS}>
             $<$<BOOL:APPLE>:-DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}>
             $<$<BOOL:APPLE>:-DCMAKE_OSX_ARCHITECTURES=${CMAKE_OSX_ARCHITECTURES}>
             $<$<BOOL:WIN32>:-DCMAKE_SHARED_LIBRARY_PREFIX="">

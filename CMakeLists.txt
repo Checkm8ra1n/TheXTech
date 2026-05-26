@@ -360,7 +360,7 @@ if(ANDROID)
     set(THEXTECH_BUILD_GL_ES_LEGACY ON CACHE BOOL "")
 endif()
 
-if(APPLE OR WIN32)
+if((APPLE AND NOT PLATFORM STREQUAL "OS64" AND NOT PLATFORM STREQUAL "OS" AND NOT PLATFORM STREQUAL "SIMULATOR64" AND NOT PLATFORM STREQUAL "SIMULATORARM64") OR WIN32)
     set(THEXTECH_BUILD_GL_ES_MODERN OFF CACHE BOOL "" FORCE)
     set(THEXTECH_BUILD_GL_ES_LEGACY OFF CACHE BOOL "" FORCE)
 endif()
@@ -802,7 +802,6 @@ if(APPLE)
     list(APPEND LIB_SRC
         ${XTECH_DEFAULT_ICNS}
         ${PGE_FILE_ICONS}
-        ${CMAKE_CURRENT_SOURCE_DIR}/resources/PkgInfo
     )
 
     if(XTECH_MACOSX_TIGER)
@@ -1390,7 +1389,9 @@ if(APPLE)
     )
     set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/${XTECH_DEFAULT_ICNS}" PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
     set_source_files_properties(${PGE_FILE_ICONS} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
-    set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/resources/PkgInfo PROPERTIES MACOSX_PACKAGE_LOCATION "")
+    if(NOT PLATFORM STREQUAL "OS64" AND NOT PLATFORM STREQUAL "OS" AND NOT PLATFORM STREQUAL "SIMULATOR64")
+        set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/resources/PkgInfo PROPERTIES MACOSX_PACKAGE_LOCATION "")
+    endif()
     if(XTECH_MACOSX_TIGER)
         set_source_files_properties("${THEXTECH_MAC_EXEX_GENERATED}" PROPERTIES MACOSX_PACKAGE_LOCATION "MacOS")
     endif()
@@ -1419,6 +1420,14 @@ if(APPLE)
     check_library_exists(iconv iconv_open "" HAVE_LIBICONV)
     if(HAVE_LIBICONV)
         target_link_libraries(A2XT_Int INTERFACE iconv)
+    endif()
+
+    # On iOS, SDL2main must be linked explicitly to provide UIApplicationMain entry point
+    if(PLATFORM STREQUAL "OS64" OR PLATFORM STREQUAL "OS" OR PLATFORM STREQUAL "SIMULATOR64" OR PLATFORM STREQUAL "SIMULATORARM64")
+        target_link_libraries(thextech PRIVATE "${SDL2_main_A_Lib}")
+        set_target_properties(thextech PROPERTIES
+            MACOSX_BUNDLE_GUI_IDENTIFIER "ru.wohlsoft.thextech"
+        )
     endif()
 
     if(PGE_USE_LUAJIT)

@@ -41,6 +41,8 @@ else()
     # FreeType to render TTF fonts
     ExternalProject_Add(
         FREETYPE_Local
+        CMAKE_GENERATOR "Unix Makefiles"
+        CMAKE_CACHE_ARGS "-DCMAKE_MAKE_PROGRAM:FILEPATH=/usr/bin/make"
         PREFIX ${CMAKE_BINARY_DIR}/external/FreeType
         DOWNLOAD_COMMAND ""
         SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/../3rdparty/freetype
@@ -48,12 +50,14 @@ else()
             "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}"
             "-DCMAKE_INSTALL_PREFIX=${DEPENDENCIES_INSTALL_DIR}"
             "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
-            "-DCMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}"
+            "-DCMAKE_MAKE_PROGRAM=/usr/bin/make"
 #            "-DCMAKE_CONFIGURATION_TYPES=${CMAKE_CONFIGURATION_TYPES}"
             "-DCMAKE_POSITION_INDEPENDENT_CODE=${FREETYPE_PIC}"
             "-DDISABLE_FORCE_DEBUG_POSTFIX=ON"
             "-DCMAKE_DEBUG_POSTFIX=${PGE_LIBS_DEBUG_SUFFIX}"
             ${ANDROID_CMAKE_FLAGS}
+            $<$<BOOL:${PLATFORM}>:-DPLATFORM=${PLATFORM}>
+            $<$<BOOL:${ARCHS}>:-DARCHS=${ARCHS}>
             -DFT_ENABLE_ERROR_STRINGS=ON
             -DFT_DISABLE_ZLIB=OFF
             -DFT_DISABLE_BZIP2=ON
