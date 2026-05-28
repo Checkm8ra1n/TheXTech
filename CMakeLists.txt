@@ -59,7 +59,11 @@ if(APPLE)
         set(XTECH_PLIST_NAME "thextech.plist.tiger.in")
         set(XTECH_DEFAULT_ICNS "resources/tiger/thextech.icns")
     else()
-        set(XTECH_PLIST_NAME "thextech.plist.in")
+        if(PLATFORM STREQUAL "OS64" OR PLATFORM STREQUAL "OS" OR PLATFORM STREQUAL "SIMULATOR64" OR PLATFORM STREQUAL "SIMULATORARM64")
+            set(XTECH_PLIST_NAME "thextech.plist.ios.in")
+        else()
+            set(XTECH_PLIST_NAME "thextech.plist.in")
+        endif()
         set(XTECH_DEFAULT_ICNS "resources/thextech.icns")
     endif()
 
@@ -1427,6 +1431,12 @@ if(APPLE)
         target_link_libraries(thextech PRIVATE "${SDL2_main_A_Lib}")
         set_target_properties(thextech PROPERTIES
             MACOSX_BUNDLE_GUI_IDENTIFIER "ru.wohlsoft.thextech"
+        )
+        # Add LaunchScreen.storyboard to the bundle
+        target_sources(thextech PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/resources/ios/LaunchScreen.storyboard")
+        set_source_files_properties(
+            "${CMAKE_CURRENT_SOURCE_DIR}/resources/ios/LaunchScreen.storyboard"
+            PROPERTIES MACOSX_PACKAGE_LOCATION Resources
         )
     endif()
 
