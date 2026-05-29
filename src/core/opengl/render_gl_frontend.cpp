@@ -26,6 +26,10 @@
 
 #include "core/opengl/gl_inc.h"
 
+#ifdef __APPLE__
+#include <TargetConditionals.h>
+#endif
+
 #include "core/opengl/render_gl.h"
 #include "core/opengl/gl_program_object.h"
 #include "core/opengl/gl_shader_translator.h"
@@ -300,8 +304,25 @@ bool RenderGL::initRender(SDL_Window *window)
 
     if(!initOpenGL()
         || !initDebug()
-        || !initShaders()
-        || !initFramebuffers()
+        || !initShaders())
+    {
+        close();
+        return false;
+    }
+
+#if defined(__APPLE__) && TARGET_OS_IPHONE
+    // On iOS, the EAGL drawable is not ready until after the first swap.
+    // Do a dummy clear+swap to ensure the default framebuffer is renderable
+    // before we create our FBOs (avoids GL_INVALID_FRAMEBUFFER_OPERATION 1286).
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    SDL_GL_SwapWindow(m_window);
+    glClear(GL_COLOR_BUFFER_BIT);
+    SDL_GL_SwapWindow(m_window);
+    while(glGetError() != GL_NO_ERROR) {}
+#endif
+
+    if(!initFramebuffers()
         || !initState()
         || !initVertexArrays())
     {

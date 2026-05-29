@@ -20,6 +20,10 @@
 
 #include "core/opengl/gl_inc.h"
 
+#ifdef __APPLE__
+#include <TargetConditionals.h>
+#endif
+
 #include <SDL2/SDL_version.h>
 
 #include <Logger/logger.h>
@@ -367,6 +371,15 @@ bool RenderGL::initOpenGL()
 
     // setup vSync
     SDL_GL_SetSwapInterval(g_config.render_vsync);
+
+#if defined(__APPLE__) && TARGET_OS_IPHONE
+    // On iOS, SDL2 manages its own EAGL framebuffer internally.
+    // Using custom FBOs on top causes GL_INVALID_FRAMEBUFFER_OPERATION
+    // because glBindFramebuffer(0) doesn't refer to the SDL-managed drawable.
+    // Disable custom FBOs to render directly to SDL's framebuffer.
+    pLogInfo("Render GL: iOS detected, disabling custom FBOs for EAGL compatibility");
+    m_has_fbo = false;
+#endif
 
     GLenum err = glGetError();
 

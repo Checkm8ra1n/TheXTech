@@ -9,7 +9,7 @@ list(APPEND APPPATH_SRCS
 if(APPLE)
     message("-- AppPath for Apple")
     list(APPEND APPPATH_SRCS
-        ${CMAKE_CURRENT_LIST_DIR}/private/app_path_macos.cpp
+        $<IF:$<BOOL:${IOS}>,${CMAKE_CURRENT_LIST_DIR}/private/app_path_macos.mm,${CMAKE_CURRENT_LIST_DIR}/private/app_path_macos.cpp>
         ${CMAKE_CURRENT_LIST_DIR}/private/app_path_macos_dirs.h
         ${CMAKE_CURRENT_LIST_DIR}/private/app_path_macos_dirs.m
     )
